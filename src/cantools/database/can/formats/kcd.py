@@ -101,7 +101,15 @@ def _load_signal_element(signal, nodes):
 
     # Notes.
     try:
-        notes = signal.find('ns:Notes', NAMESPACES).text
+        tmp = []
+        for note in signal.findall('ns:Notes', NAMESPACES):
+            tmp.append(note.text)
+        if notes is None:
+            if len(tmp) > 1:
+                notes = {None: tmp}
+            if len(tmp) == 1:
+                notes = tmp[0]
+
     except AttributeError:
         pass
 
@@ -200,7 +208,15 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
 
     # Comment.
     try:
-        notes = message.find('ns:Notes', NAMESPACES).text
+        tmp = []
+        for note in message.iterfind('ns:Notes', NAMESPACES):
+            print(f"found note: {note} with text {note.text}")
+            tmp.append(note.text)
+        if notes is None:
+            if len(tmp) > 1:
+                notes = {None: tmp}
+            if len(tmp) == 1:
+                notes = tmp[0]
     except AttributeError:
         pass
 
@@ -266,8 +282,9 @@ def _indent_xml(element, indent, level=0):
 
 
 def _dump_notes(parent, comment):
-    notes = SubElement(parent, 'Notes')
-    notes.text = comment
+    for note in comment:
+        kcd_note = SubElement(parent, 'Notes')
+        kcd_note.text = note
 
 
 def _dump_signal(signal, node_refs, signal_element):
